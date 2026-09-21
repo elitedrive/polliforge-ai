@@ -1,0 +1,72 @@
+/* PolliForge Custom CSS */
+
+/* Glassmorphism card effects */
+.glass-card {
+  background: rgba(18, 20, 30, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Style selector cards */
+.style-card {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.style-card:hover {
+  transform: translateY(-2px);
+}
+
+.style-card.active {
+  border-color: rgba(245, 158, 11, 0.8) !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+}
+
+/* Palette button active state */
+.palette-btn.active {
+  ring-width: 2px;
+  transform: scale(1.1);
+}
+
+/* Icon card selection */
+.icon-result-card.active {
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+}
+
+/* Shimmer Loading Skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-loading {
+  background: linear-gradient(90deg, #121524 25%, #1c2138 50%, #121524 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090b11;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f253d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2b3354;
+}

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolliForge — AI App Icon & Brand Studio for Developers</title>
+  <meta name="description" content="Generate production-ready app icons, favicons, and developer brand assets in seconds using Pollinations.ai Flux models.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z'/></svg>">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fffbeb',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              accent: '#8b5cf6',
+              dark: '#0a0b10',
+              card: '#12141e',
+              border: '#1f2438'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons & JSZip -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#090b11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-black antialiased">
+
+  <!-- Background Ambient Glow -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-40 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 right-10 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-20 left-1/3 w-[30rem] h-[30rem] bg-cyan-500/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="relative z-10 border-b border-[#1b1f32] bg-[#0c0f18]/80 backdrop-blur-md sticky top-0">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-violet-500 p-0.5 shadow-lg shadow-amber-500/20">
+          <div class="w-full h-full bg-[#0d101b] rounded-[10px] flex items-center justify-center">
+            <i data-lucide="flame" class="w-5 h-5 text-amber-400"></i>
+          </div>
+        </div>
+        <div>
+          <span class="text-xl font-black tracking-tight bg-gradient-to-r from-amber-400 via-amber-200 to-violet-400 bg-clip-text text-transparent">PolliForge</span>
+          <span class="hidden sm:inline-block ml-2 text-xs uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">v1.0</span>
+        </div>
+      </div>
+
+      <!-- Right Navigation & Wallet Controls -->
+      <div class="flex items-center space-x-3">
+        <!-- Powered by Pollinations Badge -->
+        <a href="https://pollinations.ai" target="_blank" rel="noopener" class="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-amber-400/40 text-xs font-medium text-slate-300 transition group">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Powered by</span>
+          <span class="text-amber-300 font-bold group-hover:underline">Pollinations.ai</span>
+        </a>
+
+        <!-- BYOP Wallet Button / Status -->
+        <div id="wallet-container" class="flex items-center">
+          <button id="btn-connect-wallet" class="flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-semibold text-xs transition shadow-md shadow-amber-500/20 active:scale-95">
+            <i data-lucide="wallet" class="w-4 h-4"></i>
+            <span>Connect Wallet (BYOP)</span>
+          </button>
+
+          <!-- Connected Wallet Pill (Hidden by default) -->
+          <div id="wallet-connected-pill" class="hidden items-center space-x-2 bg-[#141824] border border-amber-500/30 rounded-lg p-1.5 pr-3 text-xs">
+            <div class="w-6 h-6 rounded-md bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            </div>
+            <div class="flex flex-col text-left">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Pollen Balance</span>
+              <span id="wallet-balance-text" class="text-xs font-bold text-amber-300">Loading...</span>
+            </div>
+            <button id="btn-disconnect-wallet" title="Disconnect wallet" class="ml-2 text-slate-400 hover:text-red-400 transition p-1">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Manual Key Modal Trigger -->
+        <button id="btn-open-api-modal" title="Settings & API Key" class="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 transition">
+          <i data-lucide="key" class="w-4 h-4"></i>
+        </button>
+
+        <!-- GitHub Link -->
+        <a href="https://github.com/elitedrive/PolliForge" target="_blank" rel="noopener" title="Source Code on GitHub" class="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 transition">
+          <i data-lucide="github" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Hero Banner -->
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-medium mb-3">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        <span>Flux-Powered App Icon & Brand Generator</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-3">
+        Forge Production App Icons <br class="hidden sm:inline">
+        <span class="bg-gradient-to-r from-amber-400 via-amber-200 to-violet-400 bg-clip-text text-transparent">in Just 5 Seconds</span>
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+        Turn your app idea into 4 crisp, centered, production-ready app icons. Live device mockups, favicon preview, and 1-click developer bundle export.
+      </p>
+    </div>
+
+    <!-- Studio Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Column: Generator Controls (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="bg-[#111420]/90 border border-[#1d2238] rounded-2xl p-6 shadow-xl backdrop-blur-xl relative overflow-hidden">
+          
+          <!-- App Details Form -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                App Name <span class="text-amber-400">*</span>
+              </label>
+              <div class="relative">
+                <input type="text" id="input-app-name" placeholder="e.g. PolliForge, EchoDB, NovaPay" class="w-full bg-[#0a0d16] border border-[#222842] focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 transition outline-none" value="PolliForge">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                App Purpose / Keywords <span class="text-amber-400">*</span>
+              </label>
+              <textarea id="input-app-desc" rows="2" placeholder="e.g. Fast vector database for AI agents, lightning fast search" class="w-full bg-[#0a0d16] border border-[#222842] focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 transition outline-none resize-none">Fast AI icon forge and brand generator for developers with live previews</textarea>
+            </div>
+
+            <!-- Style Selector Grid -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                Visual Style
+              </label>
+              <div class="grid grid-cols-2 gap-2.5" id="style-selector">
+                <button type="button" data-style="ios-glass" class="style-card active text-left p-2.5 rounded-xl border border-amber-500/50 bg-amber-500/10 text-white transition flex items-center space-x-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center shadow">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5 text-white"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold leading-none">iOS 3D Glass</div>
+                    <div class="text-[10px] text-slate-400">Frosted, sleek depth</div>
+                  </div>
+                </button>
+
+                <button type="button" data-style="flat-vector" class="style-card text-left p-2.5 rounded-xl border border-[#222842] bg-[#0d101a] hover:border-slate-600 text-slate-300 transition flex items-center space-x-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center shadow">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-white"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold leading-none">Minimalist Vector</div>
+                    <div class="text-[10px] text-slate-400">Modern clean glyph</div>
+                  </div>
+                </button>
+
+                <button type="button" data-style="cyberpunk-neon" class="style-card text-left p-2.5 rounded-xl border border-[#222842] bg-[#0d101a] hover:border-slate-600 text-slate-300 transition flex items-center space-x-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-fuchsia-600 to-cyan-500 flex items-center justify-center shadow">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 text-white"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold leading-none">Cyberpunk Neon</div>
+                    <div class="text-[10px] text-slate-400">Glowing synthwave</div>
+                  </div>
+                </button>
+
+                <button type="button" data-style="retro-pixel" class="style-card text-left p-2.5 rounded-xl border border-[#222842] bg-[#0d101a] hover:border-slate-600 text-slate-300 transition flex items-center space-x-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center shadow">
+                    <i data-lucide="gamepad-2" class="w-3.5 h-3.5 text-white"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold leading-none">16-Bit Pixel</div>
+                    <div class="text-[10px] text-slate-400">Arcade charm</div>
+                  </div>
+                </button>
+
+                <button type="button" data-style="geometric-monogram" class="style-card text-left p-2.5 rounded-xl border border-[#222842] bg-[#0d101a] hover:border-slate-600 text-slate-300 transition flex items-center space-x-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-400 to-yellow-600 flex items-center justify-center shadow">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-black"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold leading-none">Geometric Monogram</div>
+                    <div class="text-[10px] text-slate-400">Luxury tech mark</div>
+                  </div>
+                </button>
+
+                <button type="button" data-style="playful-clay" class="style-card text-left p-2.5 rounded-xl border border-[#222842] bg-[#0d101a] hover:border-slate-600 text-slate-300 transition flex items-center space-x-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-pink-500 to-purple-500 flex items-center justify-center shadow">
+                    <i data-lucide="smile" class="w-3.5 h-3.5 text-white"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold leading-none">Playful 3D Clay</div>
+                    <div class="text-[10px] text-slate-400">Friendly mascot</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Color Palette Mood -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                Color Palette
+              </label>
+              <div class="flex items-center space-x-2" id="palette-selector">
+                <button type="button" data-palette="amber-violet" class="palette-btn active w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-violet-500 ring-2 ring-amber-400 ring-offset-2 ring-offset-[#111420] transition"></button>
+                <button type="button" data-palette="cyan-blue" class="palette-btn w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 ring-offset-2 ring-offset-[#111420] transition hover:scale-105"></button>
+                <button type="button" data-palette="emerald-dark" class="palette-btn w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-400 to-slate-900 ring-offset-2 ring-offset-[#111420] transition hover:scale-105"></button>
+                <button type="button" data-palette="crimson-gold" class="palette-btn w-8 h-8 rounded-full bg-gradient-to-tr from-rose-500 to-amber-300 ring-offset-2 ring-offset-[#111420] transition hover:scale-105"></button>
+                <button type="button" data-palette="pure-monochrome" class="palette-btn w-8 h-8 rounded-full bg-gradient-to-tr from-slate-200 to-slate-900 ring-offset-2 ring-offset-[#111420] transition hover:scale-105"></button>
+              </div>
+            </div>
+
+            <!-- Advanced Options Toggle -->
+            <div class="border-t border-[#1d2238] pt-3">
+              <button type="button" id="btn-toggle-advanced" class="flex items-center justify-between w-full text-xs font-semibold text-slate-400 hover:text-white transition">
+                <span>Advanced Settings (Model & Seed)</span>
+                <i data-lucide="chevron-down" id="icon-advanced-arrow" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+              </button>
+              
+              <div id="advanced-settings-panel" class="hidden mt-3 space-y-3 pt-2">
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Image Model</label>
+                  <select id="select-model" class="w-full bg-[#0a0d16] border border-[#222842] rounded-lg px-3 py-1.5 text-xs text-white outline-none">
+                    <option value="flux">Flux.1 Schnell (Recommended - Fast & Crisp)</option>
+                    <option value="flux-realism">Flux Realism (High Detail)</option>
+                    <option value="flux-anime">Flux Anime / Stylized</option>
+                    <option value="turbo">Turbo (Ultra Fast)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Custom Prompt Injection (Optional)</label>
+                  <input type="text" id="input-custom-addon" placeholder="e.g. centered golden flaming anvil, glossy finish" class="w-full bg-[#0a0d16] border border-[#222842] rounded-lg px-3 py-1.5 text-xs text-white outline-none placeholder-slate-600">
+                </div>
+              </div>
+            </div>
+
+            <!-- Action CTA Button -->
+            <button type="button" id="btn-forge" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm tracking-wide uppercase transition duration-150 shadow-lg shadow-amber-500/25 active:scale-[0.98] flex items-center justify-center space-x-2">
+              <i data-lucide="flame" class="w-4 h-4 text-slate-950"></i>
+              <span id="btn-forge-text">Forge 4 App Icons</span>
+            </button>
+
+            <!-- Cost Indicator -->
+            <div class="flex items-center justify-center space-x-2 text-[11px] text-slate-400">
+              <i data-lucide="info" class="w-3 h-3 text-amber-400"></i>
+              <span>Consumes ~1.00 Pollen for 4 parallel Flux variations</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results Gallery & Live Mockup Studio (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- Results Card -->
+        <div class="bg-[#111420]/90 border border-[#1d2238] rounded-2xl p-6 shadow-xl backdrop-blur-xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-white tracking-tight flex items-center space-x-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                <span>Generated Variations</span>
+              </h2>
+              <p class="text-xs text-slate-400">Click any icon to preview in mockups and download</p>
+            </div>
+            <div id="generation-status-pill" class="text-xs text-slate-400 font-mono">
+              Ready
+            </div>
+          </div>
+
+          <!-- 4 Icons Grid -->
+          <div id="results-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <!-- Variation 1 -->
+            <div class="icon-result-card active group relative aspect-square rounded-2xl bg-[#0b0e18] border-2 border-amber-400/80 p-2 flex items-center justify-center cursor-pointer transition shadow-lg shadow-amber-500/10 overflow-hidden" data-index="0">
+              <img src="https://image.pollinations.ai/prompt/app%20icon%20for%20PolliForge%2C%20glowing%20golden%20anvil%20and%20stylized%20flame%2C%20iOS%20glassmorphism%20squircle%2C%20isolated%20centered%2C%20high%20contrast%2C%20clean%20dark%20background%2C%20vector%20graphic%2C%20no%20text?width=512&height=512&nologo=true&seed=42" alt="Icon 1" class="w-full h-full object-cover rounded-xl transition duration-300 group-hover:scale-105">
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-amber-400 text-black">Select</span>
+              </div>
+            </div>
+
+            <!-- Variation 2 -->
+            <div class="icon-result-card group relative aspect-square rounded-2xl bg-[#0b0e18] border border-[#222842] hover:border-amber-400/50 p-2 flex items-center justify-center cursor-pointer transition overflow-hidden" data-index="1">
+              <img src="https://image.pollinations.ai/prompt/app%20icon%20for%20PolliForge%2C%20minimalist%20geometric%20flaming%20hammer%20and%20sparks%2C%20purple%20and%20amber%20colors%2C%20iOS%20squircle%2C%20centered%2C%20clean%20dark%20background%2C%20no%20text?width=512&height=512&nologo=true&seed=108" alt="Icon 2" class="w-full h-full object-cover rounded-xl transition duration-300 group-hover:scale-105">
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-amber-400 text-black">Select</span>
+              </div>
+            </div>
+
+            <!-- Variation 3 -->
+            <div class="icon-result-card group relative aspect-square rounded-2xl bg-[#0b0e18] border border-[#222842] hover:border-amber-400/50 p-2 flex items-center justify-center cursor-pointer transition overflow-hidden" data-index="2">
+              <img src="https://image.pollinations.ai/prompt/modern%20tech%20monogram%20icon%20for%20PolliForge%2C%20futuristic%20letter%20P%20and%20flame%20symbol%2C%20isometric%203D%20glass%2C%20clean%20dark%20background%2C%20no%20text?width=512&height=512&nologo=true&seed=333" alt="Icon 3" class="w-full h-full object-cover rounded-xl transition duration-300 group-hover:scale-105">
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-amber-400 text-black">Select</span>
+              </div>
+            </div>
+
+            <!-- Variation 4 -->
+            <div class="icon-result-card group relative aspect-square rounded-2xl bg-[#0b0e18] border border-[#222842] hover:border-amber-400/50 p-2 flex items-center justify-center cursor-pointer transition overflow-hidden" data-index="3">
+              <img src="https://image.pollinations.ai/prompt/cyberpunk%20neon%20app%20icon%20for%20PolliForge%2C%20electric%20forge%20with%20violet%20and%20cyan%20plasma%2C%20sleek%20iOS%20squircle%2C%20centered%2C%20no%20text?width=512&height=512&nologo=true&seed=777" alt="Icon 4" class="w-full h-full object-cover rounded-xl transition duration-300 group-hover:scale-105">
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-amber-400 text-black">Select</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mockup Studio Switcher -->
+          <div class="border-t border-[#1d2238] pt-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Live Mockup Preview</span>
+              <div class="flex items-center space-x-1 bg-[#0a0d16] p-1 rounded-lg border border-[#222842]">
+                <button type="button" id="tab-phone" class="mockup-tab active px-2.5 py-1 rounded text-xs font-semibold bg-amber-500/20 text-amber-300 transition">Phone</button>
+                <button type="button" id="tab-browser" class="mockup-tab px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition">Browser Tab</button>
+                <button type="button" id="tab-store" class="mockup-tab px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition">App Store</button>
+              </div>
+            </div>
+
+            <!-- Mockup Canvas Display -->
+            <div class="bg-[#080a10] border border-[#1d2238] rounded-xl p-4 flex items-center justify-center min-h-[220px]">
+              
+              <!-- 1. Phone View -->
+              <div id="preview-phone-view" class="w-full max-w-sm flex items-center justify-around py-4">
+                <!-- Our App Icon -->
+                <div class="flex flex-col items-center space-y-1.5">
+                  <div class="w-16 h-16 rounded-[18px] bg-black shadow-xl ring-1 ring-white/10 overflow-hidden relative group">
+                    <img id="active-preview-icon" src="https://image.pollinations.ai/prompt/app%20icon%20for%20PolliForge%2C%20glowing%20golden%20anvil%20and%20stylized%20flame%2C%20iOS%20glassmorphism%20squircle%2C%20isolated%20centered%2C%20high%20contrast%2C%20clean%20dark%20background%2C%20vector%20graphic%2C%20no%20text?width=512&height=512&nologo=true&seed=42" alt="Active Icon" class="w-full h-full object-cover">
+                  </div>
+                  <span id="preview-app-name" class="text-[11px] font-medium text-slate-200 tracking-tight">PolliForge</span>
+                </div>
+
+                <!-- Simulated system app 1 -->
+                <div class="flex flex-col items-center space-y-1.5 opacity-40">
+                  <div class="w-16 h-16 rounded-[18px] bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white">
+                    <i data-lucide="compass" class="w-8 h-8"></i>
+                  </div>
+                  <span class="text-[11px] font-medium text-slate-400">Safari</span>
+                </div>
+
+                <!-- Simulated system app 2 -->
+                <div class="flex flex-col items-center space-y-1.5 opacity-40">
+                  <div class="w-16 h-16 rounded-[18px] bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white">
+                    <i data-lucide="message-square" class="w-8 h-8"></i>
+                  </div>
+                  <span class="text-[11px] font-medium text-slate-400">Chat</span>
+                </div>
+              </div>
+
+              <!-- 2. Browser Tab View (Hidden initially) -->
+              <div id="preview-browser-view" class="hidden w-full max-w-md">
+                <div class="bg-[#181b28] rounded-lg border border-[#272d45] overflow-hidden shadow-2xl">
+                  <!-- Simulated tab header -->
+                  <div class="bg-[#10131e] px-3 py-2 flex items-center space-x-2 border-b border-[#272d45]">
+                    <div class="flex space-x-1.5 mr-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+                      <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
+                      <span class="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
+                    </div>
+                    <!-- Tab -->
+                    <div class="bg-[#181b28] px-3 py-1.5 rounded-t-md flex items-center space-x-2 border-t border-x border-[#272d45] max-w-[200px]">
+                      <img id="browser-tab-favicon" src="https://image.pollinations.ai/prompt/app%20icon%20for%20PolliForge%2C%20glowing%20golden%20anvil%20and%20stylized%20flame%2C%20iOS%20glassmorphism%20squircle%2C%20isolated%20centered%2C%20high%20contrast%2C%20clean%20dark%20background%2C%20vector%20graphic%2C%20no%20text?width=512&height=512&nologo=true&seed=42" class="w-4 h-4 rounded-sm object-cover">
+                      <span id="browser-tab-title" class="text-xs text-slate-200 truncate">PolliForge — Studio</span>
+                      <i data-lucide="x" class="w-3 h-3 text-slate-500"></i>
+                    </div>
+                  </div>
+                  <!-- Simulated webpage bar -->
+                  <div class="p-3 bg-[#131622] flex items-center space-x-2 text-[11px] text-slate-400">
+                    <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
+                    <span class="font-mono text-slate-300">https://polliforge.dev</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. App Store View (Hidden initially) -->
+              <div id="preview-store-view" class="hidden w-full max-w-md p-2">
+                <div class="flex items-center space-x-4 bg-[#141824] p-4 rounded-xl border border-[#222842]">
+                  <div class="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-black overflow-hidden flex-shrink-0 ring-1 ring-white/10">
+                    <img id="store-preview-icon" src="https://image.pollinations.ai/prompt/app%20icon%20for%20PolliForge%2C%20glowing%20golden%20anvil%20and%20stylized%20flame%2C%20iOS%20glassmorphism%20squircle%2C%20isolated%20centered%2C%20high%20contrast%2C%20clean%20dark%20background%2C%20vector%20graphic%2C%20no%20text?width=512&height=512&nologo=true&seed=42" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div id="store-app-name" class="text-sm font-bold text-white truncate">PolliForge</div>
+                    <div id="store-app-desc" class="text-xs text-slate-400 truncate">AI App Icon Studio</div>
+                    <div class="flex items-center space-x-1 mt-1 text-amber-400 text-xs">
+                      <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                      <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                      <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                      <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                      <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                      <span class="text-slate-500 text-[10px] ml-1">5.0 (4.2k)</span>
+                    </div>
+                  </div>
+                  <button class="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-amber-400 font-bold text-xs uppercase tracking-wider transition">GET</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Export Buttons Row -->
+            <div class="flex flex-wrap gap-2.5 mt-5">
+              <!-- Single PNG Download -->
+              <button type="button" id="btn-download-png" class="flex-1 py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition flex items-center justify-center space-x-1.5 active:scale-95">
+                <i data-lucide="download" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Download PNG (512x512)</span>
+              </button>
+
+              <!-- High Res PNG Download -->
+              <button type="button" id="btn-download-hd" class="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition flex items-center justify-center space-x-1.5 active:scale-95">
+                <i data-lucide="maximize" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>1024x1024 Retina</span>
+              </button>
+
+              <!-- Full Developer ZIP Bundle -->
+              <button type="button" id="btn-export-zip" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs transition flex items-center justify-center space-x-1.5 shadow-md shadow-amber-500/20 active:scale-95">
+                <i data-lucide="package" class="w-3.5 h-3.5 text-black"></i>
+                <span id="btn-zip-text">Export Dev Bundle (.ZIP)</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer with Mandatory Pollinations Attribution -->
+  <footer class="relative z-10 border-t border-[#1b1f32] bg-[#080a10] py-8 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <!-- Attribution badge -->
+      <div class="flex items-center space-x-3">
+        <a href="https://pollinations.ai" target="_blank" rel="noopener" class="flex items-center space-x-2 text-slate-300 hover:text-amber-300 transition">
+          <span class="font-bold text-white">PolliForge</span>
+          <span>— Powered by</span>
+          <span class="text-amber-400 font-semibold underline underline-offset-2">Pollinations.ai</span>
+        </a>
+        <span class="text-slate-600">•</span>
+        <span>Flux.1 Generative Engine</span>
+      </div>
+
+      <!-- Links -->
+      <div class="flex items-center space-x-4">
+        <a href="https://enter.pollinations.ai" target="_blank" rel="noopener" class="hover:text-white transition">Pollen Balance & Keys</a>
+        <a href="https://github.com/pollinations/pollinations" target="_blank" rel="noopener" class="hover:text-white transition">Pollinations GitHub</a>
+        <a href="https://github.com/elitedrive/PolliForge" target="_blank" rel="noopener" class="hover:text-white transition">PolliForge Repo (MIT)</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- API Key / BYOP Settings Modal -->
+  <div id="modal-api-settings" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-[#121522] border border-[#222842] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+          <span>API Key & BYOP Settings</span>
+        </h3>
+        <button id="btn-close-modal" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400">
+        PolliForge uses the official Pollinations Bring Your Own Pollen (BYOP) protocol. You can connect your wallet or provide an API key directly.
+      </p>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">
+          Pollinations API Secret Key (<code class="text-amber-400 font-mono">sk_...</code>)
+        </label>
+        <input type="password" id="input-custom-key" placeholder="sk_your_pollinations_key" class="w-full bg-[#0a0d16] border border-[#222842] rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-amber-400">
+        <span class="text-[11px] text-slate-500 block mt-1">Leave empty to use OAuth BYOP wallet authorization or community free tier.</span>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end space-x-2">
+        <button id="btn-clear-key" class="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 text-xs text-slate-300">Clear</button>
+        <button id="btn-save-key" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

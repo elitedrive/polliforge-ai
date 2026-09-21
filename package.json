@@ -1,0 +1,33 @@
+{
+  "name": "polliforge-ai",
+  "version": "1.0.0",
+  "description": "AI-Powered App Icon & Brand Asset Studio for Developers, powered by Pollinations.ai",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types"
+  },
+  "keywords": [
+    "pollinations",
+    "pollinations-ai",
+    "byop",
+    "app-icons",
+    "logo-generator",
+    "flux",
+    "cloudflare-workers",
+    "hono"
+  ],
+  "author": "Samuel / EliteDrive",
+  "license": "MIT",
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260918.1",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.135.0"
+  }
+}
